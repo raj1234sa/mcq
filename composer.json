@@ -35,6 +35,7 @@
     "autoload": {
 		"files": [
 			"app\\Http\\path.php",
+            "app\\Http\\functions.php",
 			"app\\Http\\html_helper.php"
         ],
         "psr-4": {

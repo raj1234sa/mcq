@@ -9,7 +9,8 @@
                     <thead class="thead-default">
                     <tr>
                         <th>Sr</th>
-                        <th>Name</th>
+                        <th>Department Name</th>
+                        <th class="text-center">Status</th>
                         <th data-order="false">Action</th>
                     </tr>
                     </thead>

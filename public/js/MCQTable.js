@@ -220,13 +220,10 @@ $(document).ready(function () {
             (key >= 48 && key <= 57) ||
             (key >= 96 && key <= 105));
     });
-    $(document).delegate('input.change_status.ajax', 'change', function () {
+    $(document).delegate('button.change_status.ajax', 'click', function () {
         var url = $(this).data('url');
-        var id = $(this).parent().parent().attr('id').split(":")[1];
-        var status = '0';
-        if ($(this).prop('checked')) {
-            status = '1';
-        }
+        var id = $(this).data('id');
+        var status = $(this).data('status');
         $.ajax({
             url: url,
             type: 'POST',
@@ -241,10 +238,11 @@ $(document).ready(function () {
                 } else {
                     failMessage("Error while changing status.");
                 }
+                stopAjaxLoader();
             },
             complete: function () {
-                drawTable(getSearchAction());
                 stopAjaxLoader();
+                drawTable(getSearchAction());
             }
         });
     });
@@ -253,7 +251,7 @@ $(document).ready(function () {
         e.preventDefault();
         var atag = $(this);
         Swal.fire({
-            title: 'Are you sure to delete department?',
+            title: 'Are you sure to delete record?',
             showCancelButton: true,
             confirmButtonClass: 'btn btn-danger',
             confirmButtonText: `Delete`,
@@ -268,14 +266,15 @@ $(document).ready(function () {
                     },
                     success: function (response) {
                         if (response == 'success') {
-                            Swal.fire('Department Deleted!', '', 'success')
+                            Swal.fire('Record Deleted successfully!', '', 'success')
                         } else {
                             failMessage(response);
                         }
+                        stopAjaxLoader();
                     },
                     complete: function () {
-                        drawTable(getSearchAction());
                         stopAjaxLoader();
+                        drawTable(getSearchAction());
                     }
                 });
             }

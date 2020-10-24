@@ -68,7 +68,7 @@
                             {!! draw_action_buttons($actions) !!}
                         @endif
                         @if (isset($form_buttons) && $form_buttons === true)
-                            {!! draw_form_buttons(array('save', 'save_back', 'reset'), '/department-list') !!}
+                            {!! draw_form_buttons(array('save', 'save_back', 'reset'), $backlink) !!}
                         @endif
                     </div>
                 </header>

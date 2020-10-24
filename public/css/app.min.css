@@ -11017,7 +11017,7 @@ select.form-control {
     font-weight: 400
 }
 
-.tooltip, b, strong {
+.tooltip, b/*, strong*/ {
     font-weight: 500
 }
 

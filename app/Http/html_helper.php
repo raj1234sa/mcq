@@ -1,4 +1,7 @@
 <?php
+
+use Illuminate\Support\Facades\URL;
+
 function get_sidebar_links()
 {
     $links = array();
@@ -14,6 +17,16 @@ function get_sidebar_links()
             array(
                 'title' => 'Departments',
                 'route' => '/department-list',
+            ),
+        ),
+    );
+    $links[] = array(
+        'title' => 'Category',
+        'icon' => 'zmdi zmdi-folder',
+        'children' => array(
+            array(
+                'title' => 'Categories',
+                'route' => '/category-list',
             ),
         ),
     );
@@ -34,7 +47,7 @@ function draw_action_buttons($actions)
 {
     $html = '';
     foreach ($actions as $title => $button) {
-        $html .= "<a class='btn {$button['class']} btn--icon-text' href='".URL::to($button['route'])."'><i class='{$button['icon']}'></i>{$title}</a>";
+        $html .= "<a class='btn {$button['class']} btn--icon-text' href='" . URL::to($button['route']) . "'><i class='{$button['icon']}'></i>{$title}</a>";
     }
     return $html;
 }
@@ -61,26 +74,6 @@ function draw_form_buttons($actions, $backlink)
     return $html;
 }
 
-function form_element($label, $name, $type, $value, $extra = array()) {
-    $html = '';
-    $id = $name;
-    $div_class = '';
-    if(isset($extra['id']) || !empty($extra['id'])) {
-        $id = $extra['id'];
-    }
-    if(isset($extra['frm_grp_class'])) {
-        $div_class = $extra['frm_grp_class'];
-    }
-    $html .= "<div class='form-group col-12 $div_class'>";
-    if(!empty($label)) {
-        $html .= "<label>$label</label>";
-    }
-    $html .= "<input type='$type' value='$value' name='$name' id='$id' class='form-control'>";
-    $html .= '<i class="form-group__bar"></i>';
-    $html .= "</div>";
-    return $html;
-}
-
 function draw_action_menu($action_links)
 {
     $html = '';
@@ -100,6 +93,106 @@ function draw_action_menu($action_links)
                 </li>";
     }
     $html .= '</ul></div>';
+    return $html;
+}
+
+function form_element($label, $name, $type, $value, $extra = array())
+{
+    $html = '';
+    $id = $name;
+    $div_class = '';
+    if (isset($extra['id']) || !empty($extra['id'])) {
+        $id = $extra['id'];
+    }
+    if (isset($extra['frm_grp_class'])) {
+        $div_class = $extra['frm_grp_class'];
+    }
+    $html .= "<div class='form-group col-12 $div_class'>";
+    if (!empty($label)) {
+        $html .= "<label>$label</label>";
+    }
+    $html .= "<input type='$type' value='$value' name='$name' id='$id' class='form-control'>";
+    $html .= '<i class="form-group__bar"></i>';
+    $html .= "</div>";
+    return $html;
+}
+
+function form_select($label, $name, $value, $extra = array())
+{
+    $html = '';
+    $id = $name;
+    $div_class = '';
+    if (isset($extra['id']) || !empty($extra['id'])) {
+        $id = $extra['id'];
+    }
+    if (isset($extra['frm_grp_class'])) {
+        $div_class = $extra['frm_grp_class'];
+    }
+    $html .= "<div class='form-group col-12 $div_class'>";
+    if (!empty($label)) {
+        $html .= "<label>$label</label>";
+    }
+    $attributes = '';
+    if (isset($extra['attributes']) && !empty($extra['attributes'])) {
+        $attributes = $extra['attributes'];
+    }
+    $html .= "<select class='select2' id='$id' name='$name' $attributes>";
+    $dropdownArr = $extra['list'];
+    foreach ($dropdownArr as $key => $value1) {
+        $selected = ($value == $value1[$extra['value_field']]) ? "selected='selected'" : '';
+        $html .= "<option value='" . $value1[$extra['value_field']] . "' $selected>" . $value1[$extra['text_field']] . "</option>";
+    }
+    $html .= "</select>";
+    $html .= "</div>";
+    return $html;
+}
+
+function draw_switchbutton($label, $name, $value, $extra = array())
+{
+    $html = '';
+    $id = $name;
+    $div_class = '';
+    if (isset($extra['id']) || !empty($extra['id'])) {
+        $id = $extra['id'];
+    }
+    if (isset($extra['frm_grp_class'])) {
+        $div_class = $extra['frm_grp_class'];
+    }
+    if ($extra['form_group'] != false) {
+        $html .= "<div class='form-group col-12 $div_class'>";
+    }
+    if (!empty($label)) {
+        $html .= "<label>$label</label>";
+    }
+    $html = "<div class='toggle-switch toggle-switch--blue'>";
+    $html .= "<input type='checkbox' class='toggle-switch__checkbox' value='$value' name='$name' id='$id'>";
+    $html .= "<i class='toggle-switch__helper'></i>";
+    $html .= "</div>";
+    if ($extra['form_group'] != false) {
+        $html .= "</div>";
+    }
+    return $html;
+}
+
+function draw_options($list, $value_field, $text_field, $selected) {
+    $html = '';
+    foreach ($list as $value) {
+        $select = ($selected == $value[$value_field]) ? "selected='selected'" : '';
+        $html .= "<option value='" . $value[$value_field] . "' $select>" . $value[$text_field] . "</option>";
+    }
+    return $html;
+}
+
+function getDetails($list, $keys = array()) {
+    $html = '';
+    $i = 1;
+    foreach ($keys as $key => $val) {
+        $html .= "<strong>".$val['title']."</strong>: ".$list[$key];
+        if(count($keys) != $i) {
+            $html .= "<br>";
+        }
+        $i++;
+    }
     return $html;
 }
 ?>

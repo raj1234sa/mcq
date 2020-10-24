@@ -47,3 +47,8 @@
     top: 11%;
     transform: translateX(-50%);
 }
+
+.dataTables_empty {
+    text-align: center;
+    color: #32c787;
+}
