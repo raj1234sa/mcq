@@ -84,20 +84,33 @@ class DepartmentController extends Controller
     public function getDepartments(Request $req)
     {
         $fieldArr = array(
-            'id',
+            'departments.id',
             'department_name',
             'status',
         );
         $order = $req->input('order')[0]['column'];
         $dir = $req->input('order')[0]['dir'];
         $totalRec = count(Department::get());
+
+        $search = extract_search_field($req);
+        
         $start = $req->input('start');
         $length = $req->input('length');
         $departments = Department::offset($start)->limit($length);
+        $departments->select("departments.*", "categories.id as category_id", "subjects.id as subject_id");
         $departments->orderBy($fieldArr[$order], $dir);
+        $departments->leftjoin("categories", "categories.department_id", "=", "departments.id");
+        $departments->leftjoin("subjects", "subjects.department_id", "=", "departments.id");
+
+        if(!empty($search['keywords'])) {
+            $departments->where("departments.department_name", "LIKE", "%{$search['keywords']}%");
+        }
+
         $departments = $departments->get();
+        
+        $htmlArray = array();
         $sr = $start+1;
-        foreach ($departments as $key => $dept) {
+        foreach ($departments as $dept) {
             $rec = array();
             $rec['DT_RowId'] = 'serv:' . $dept['id'];
             $rec[] = $sr;
@@ -107,11 +120,13 @@ class DepartmentController extends Controller
                 'icon' => 'far fa-edit',
                 'link' => '/department-add/' . $dept['id'],
             );
-            $action_links['Delete'] = array(
-                'class' => 'label-danger ajax delete',
-                'icon' => 'far fa-trash-alt',
-                'link' => '/department-delete/' . $dept['id'],
-            );
+            if(empty($dept['category_id']) && empty($dept['subject_id'])) {
+                $action_links['Delete'] = array(
+                    'class' => 'label-danger ajax delete',
+                    'icon' => 'far fa-trash-alt',
+                    'link' => '/department-delete/' . $dept['id'],
+                );
+            }
             $currentStatus = $dept['status'] == '1' ? '<span class="text-success">ACTIVE</span>' : '<span class="text-danger">INACTIVE</span>';
             $statusButton = $dept['status'] == '1' ? "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='0' data-url='/department-status' data-id='{$dept['id']}' title='Deactivate'><i class='zmdi zmdi-close'></i></button>" : "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='1' data-url='/department-status' data-id='{$dept['id']}' title='Activate'><i class='zmdi zmdi-check'></i></button>";
             $rec[] = $currentStatus.$statusButton;

@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 
 function get_sidebar_links()
@@ -96,7 +97,7 @@ function draw_action_menu($action_links)
     return $html;
 }
 
-function form_element($label, $name, $type, $value, $extra = array())
+function form_element($label, $name, $type, $value='', $extra = array())
 {
     $html = '';
     $id = $name;
@@ -107,11 +108,19 @@ function form_element($label, $name, $type, $value, $extra = array())
     if (isset($extra['frm_grp_class'])) {
         $div_class = $extra['frm_grp_class'];
     }
-    $html .= "<div class='form-group col-12 $div_class'>";
+    if(isset($extra['form_group']) && $extra['form_group'] == false) {
+        $html .= "<div class='position-relative $div_class'>";
+    } else {
+        $html .= "<div class='form-group col-12 $div_class'>";
+    }
     if (!empty($label)) {
         $html .= "<label>$label</label>";
     }
-    $html .= "<input type='$type' value='$value' name='$name' id='$id' class='form-control'>";
+    $placeholder = '';
+    if(isset($extra['hint'])) {
+        $placeholder = $extra['hint'];
+    }
+    $html .= "<input type='$type' value='$value' name='$name' id='$id' class='form-control' placeholder='$placeholder'>";
     $html .= '<i class="form-group__bar"></i>';
     $html .= "</div>";
     return $html;
@@ -128,7 +137,11 @@ function form_select($label, $name, $value, $extra = array())
     if (isset($extra['frm_grp_class'])) {
         $div_class = $extra['frm_grp_class'];
     }
-    $html .= "<div class='form-group col-12 $div_class'>";
+    if(isset($extra['form_group']) && $extra['form_group'] == false) {
+        $html .= "<div class='position-relative $div_class'>";
+    } else {
+        $html .= "<div class='form-group col-12 $div_class'>";
+    }
     if (!empty($label)) {
         $html .= "<label>$label</label>";
     }
@@ -136,10 +149,18 @@ function form_select($label, $name, $value, $extra = array())
     if (isset($extra['attributes']) && !empty($extra['attributes'])) {
         $attributes = $extra['attributes'];
     }
+    if (isset($extra['searchdropdown']) && $extra['searchdropdown'] == false) {
+        $attributes .= "data-minimum-results-for-search='Infinity'";
+    }
     $html .= "<select class='select2' id='$id' name='$name' $attributes>";
+
+    if (isset($extra['list_before']) && !empty($extra['list_before'])) {
+        $html .= $extra['list_before'];
+    }
+
     $dropdownArr = $extra['list'];
-    foreach ($dropdownArr as $key => $value1) {
-        $selected = ($value == $value1[$extra['value_field']]) ? "selected='selected'" : '';
+    foreach ($dropdownArr as $value1) {
+        $selected = (!empty($value) && $value == $value1[$extra['value_field']]) ? "selected='selected'" : '';
         $html .= "<option value='" . $value1[$extra['value_field']] . "' $selected>" . $value1[$extra['text_field']] . "</option>";
     }
     $html .= "</select>";
@@ -187,12 +208,19 @@ function getDetails($list, $keys = array()) {
     $html = '';
     $i = 1;
     foreach ($keys as $key => $val) {
-        $html .= "<strong>".$val['title']."</strong>: ".$list[$key];
+        $html .= "<strong>".$val['title'].":</strong> ".$list[$key];
         if(count($keys) != $i) {
             $html .= "<br>";
         }
         $i++;
     }
     return $html;
+}
+
+function draw_disabled_dropdown($status) {
+    if(!$status) {
+        return " (X)";
+    }
+    return '';
 }
 ?>

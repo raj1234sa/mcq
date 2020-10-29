@@ -17,9 +17,14 @@ class CategoryController extends Controller
             'route' => '/category-add',
             'class' => 'btn-success'
         );
+        $departments = Department::get();
+        foreach ($departments as $value) {
+            $value->department_name .= draw_disabled_dropdown($value['status']);
+        }
         $data = array(
             'route' => "/category-list",
             'actions' => $action_button,
+            'departments' => $departments,
         );
         return view('categories.index', $data);
     }
@@ -98,33 +103,48 @@ class CategoryController extends Controller
         $order = $req->input('order')[0]['column'];
         $dir = $req->input('order')[0]['dir'];
         $totalRec = count(Category::get());
+
+        $search = extract_search_field($req);
+
         $start = $req->input('start');
         $length = $req->input('length');
         $categories = Category::offset($start)->limit($length);
         $categories->orderBy($fieldArr[$order], $dir);
-        $categories->select('categories.*', 'departments.department_name');
-        $categories->join('departments', 'departments.id', '=', 'categories.department_id');
+
+        if(!empty($search['keywords'])) {
+            $categories->where("category_name", "LIKE", "%{$search['keywords']}%");
+        }
+        if(!empty($search['department_id'])) {
+            $categories->where("department_id", "=", $search['department_id']);
+        }
+
         $categories = $categories->get();
+
         $sr = $start + 1;
         $htmlArray = array();
-        foreach ($categories as $key => $dept) {
+        foreach ($categories as $cate) {
+            $cate->department;
+            $cate->subject;
+
             $rec = array();
-            $rec['DT_RowId'] = 'cat:' . $dept['id'];
+            $rec['DT_RowId'] = 'cat:' . $cate['id'];
             $rec[] = $sr;
-            $rec[] = $dept['category_name'];
-            $rec[] = $dept['department_name'];
+            $rec[] = $cate['category_name'];
+            $rec[] = $cate['department']['department_name'];
             $action_links = array();
             $action_links['Edit'] = array(
                 'icon' => 'far fa-edit',
-                'link' => '/category-add/' . $dept['id'],
+                'link' => '/category-add/' . $cate['id'],
             );
-            $action_links['Delete'] = array(
-                'class' => 'label-danger ajax delete',
-                'icon' => 'far fa-trash-alt',
-                'link' => '/category-delete/' . $dept['id'],
-            );
-            $currentStatus = $dept['status'] == '1' ? '<span class="text-success">ACTIVE</span>' : '<span class="text-danger">INACTIVE</span>';
-            $statusButton = $dept['status'] == '1' ? "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='0' data-url='/category-status' data-id='{$dept['id']}' title='Deactivate'><i class='zmdi zmdi-close'></i></button>" : "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='1' data-url='/category-status' data-id='{$dept['id']}' title='Activate'><i class='zmdi zmdi-check'></i></button>";
+            if(empty($cate['subject']) && $cate['department']) {
+                $action_links['Delete'] = array(
+                    'class' => 'label-danger ajax delete',
+                    'icon' => 'far fa-trash-alt',
+                    'link' => '/category-delete/' . $cate['id'],
+                );
+            }
+            $currentStatus = $cate['status'] == '1' ? '<span class="text-success">ACTIVE</span>' : '<span class="text-danger">INACTIVE</span>';
+            $statusButton = $cate['status'] == '1' ? "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='0' data-url='/category-status' data-id='{$cate['id']}' title='Deactivate'><i class='zmdi zmdi-close'></i></button>" : "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='1' data-url='/category-status' data-id='{$cate['id']}' title='Activate'><i class='zmdi zmdi-check'></i></button>";
             $rec[] = $currentStatus . $statusButton;
             $rec[] = draw_action_menu($action_links);
             $htmlArray[] = $rec;

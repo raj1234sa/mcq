@@ -2406,7 +2406,7 @@ select.form-control[multiple], select.form-control[size], textarea.form-control 
 
     .form-inline .form-control {
         display: inline-block;
-        width: auto;
+        /* width: auto; */
         vertical-align: middle
     }
 
@@ -15158,11 +15158,11 @@ button, input, optgroup, select, textarea {
 }
 
 .dataTables_wrapper {
-    margin-top: 20px
+    /* margin-top: 20px */
 }
 
 .dataTables_wrapper .table {
-    margin: 40px 0 20px
+    margin: 20px 0 20px
 }
 
 .dataTables_wrapper .table > thead > tr > th {

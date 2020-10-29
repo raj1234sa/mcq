@@ -97,34 +97,34 @@ function drawTable(action = [], from = '') {
         },
         "fnDrawCallback": function () {
             stopAjaxLoader();
-            $("#dataTable_previous").html('<i class="ace-icon fa fa-angle-double-left"></i>');
-            $("#dataTable_next").html('<i class="ace-icon fa fa-angle-double-right"></i>');
-            // if ($("tbody").text() != "No data available in table") {
-            //     var html = '';
-            //     if ($(".table-tools").html() == undefined) {
-            //         html += '<div class="table-tools">';
-            //     }
-            //     tabletools.forEach(element => {
-            //         if (element == 'print') {
-            //             var printHtml = '';
-            //             printHtml = '<button type="button" class="btn btn-white print-btn"><i class="fas fa-print"></i></button>';
-            //             html += printHtml;
-            //         }
-            //         if (element == 'export') {
-            //             var exportHtml = '';
-            //             exportHtml = '<button type="button" data-export=' + exportRoute + ' class="btn btn-white btn-success export-btn"><i class="fa fa-file-excel"></i></button>';
-            //             html += exportHtml;
-            //         }
-            //     });
-            //     if ($(".table-tools").html() == undefined) {
-            //         html += '</div>';
-            //         $(".table-responsive").before(html);
-            //     } else {
-            //         $(".table-tools").html(html);
-            //     }
-            // } else {
-            //     $(".table-tools").remove();
-            // }
+            if ($("tbody").text() != "No data available in table") {
+                var html = '';
+                if ($(".table-tools").html() == undefined) {
+                    html += '<div class="table-tools">';
+                }
+                if(typeof tabletools !== 'undefined' && tabletools !== null) {
+                    tabletools.forEach(element => {
+                        if (element == 'print') {
+                            var printHtml = '';
+                            printHtml = '<button type="button" class="btn btn-white print-btn"><i class="fas fa-print"></i></button>';
+                            html += printHtml;
+                        }
+                        if (element == 'export') {
+                            var exportHtml = '';
+                            exportHtml = '<button type="button" data-export=' + exportRoute + ' class="btn btn-white btn-success export-btn"><i class="fa fa-file-excel"></i></button>';
+                            html += exportHtml;
+                        }
+                    });
+                }
+                if ($(".table-tools").html() == undefined) {
+                    html += '</div>';
+                    $(".table-responsive").before(html);
+                } else {
+                    $(".table-tools").html(html);
+                }
+            } else {
+                $(".table-tools").remove();
+            }
         },
         "stateSave": false,
         "ajax": {
@@ -205,6 +205,7 @@ $(document).ready(function () {
     });
     $("#filterForm button[type=button]#reset").click(function () {
         $("#filterForm button[type!=button], #filterForm select, #filterForm input").val("");
+        $("#filterForm select").trigger('change');
         $("#filterForm button[type=button]#search").click();
     });
     $("input.only-number").keydown(function (e) {

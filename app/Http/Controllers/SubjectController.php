@@ -18,9 +18,19 @@ class SubjectController extends Controller
             'route' => '/subject-add',
             'class' => 'btn-success'
         );
+        $departments = Department::get();
+        foreach ($departments as $value) {
+            $value->department_name .= draw_disabled_dropdown($value['status']);
+        }
+        $categories = Category::get();
+        foreach ($categories as $value) {
+            $value->category_name .= draw_disabled_dropdown($value['status']);
+        }
         $data = array(
             'route' => "/subject-list",
             'actions' => $action_button,
+            'departments' => $departments,
+            'categories' => $categories,
         );
         return view('subjects.index', $data);
     }
@@ -99,27 +109,47 @@ class SubjectController extends Controller
         $fieldArr = array(
             'id',
             'subject_name',
+            'department_name,category_name',
             'status',
         );
         $order = $req->input('order')[0]['column'];
         $dir = $req->input('order')[0]['dir'];
         $totalRec = count(Subject::get());
+        $search = extract_search_field($req);
+
         $start = $req->input('start');
         $length = $req->input('length');
         $subjects = Subject::offset($start)->limit($length);
-        $subjects->orderBy($fieldArr[$order], $dir);
-        $subjects->select('subjects.*', 'departments.department_name', 'categories.category_name');
-        $subjects->join('departments', 'departments.id', '=', 'subjects.department_id');
-        $subjects->join('categories', 'categories.id', '=', 'subjects.category_id');
+        $sortFields = explode(',', $fieldArr[$order]);
+        foreach ($sortFields as $value) {
+            $subjects->orderBy($value, $dir);
+        }
+        if(!empty($search['keywords'])) {
+            $subjects->where("subject_name", "LIKE", "%{$search['keywords']}%");
+        }
+        if(!empty($search['department_id'])) {
+            $subjects->where("department_id", "=", $search['department_id']);
+        }
+        if(!empty($search['category_id'])) {
+            $subjects->where("category_id", "=", $search['category_id']);
+        }
         $subjects = $subjects->get();
+        
         $sr = $start + 1;
         $htmlArray = array();
-        foreach ($subjects as $key => $subj) {
+        foreach ($subjects as $subj) {
+            $subj->department;
+            $subj->category;
+
             $rec = array();
             $rec['DT_RowId'] = 'sub:' . $subj['id'];
             $rec[] = $sr;
             $rec[] = $subj['subject_name'];
-            $rec[] = getDetails($subj, array(
+            $details = array(
+                'department_name' => $subj['department']['department_name'],
+                'category_name' => $subj['category']['category_name']
+            );
+            $rec[] = getDetails($details, array(
                 'department_name' => array('title'=>'Department Name'),
                 'category_name' => array('title'=>'Category Name'),
             ));
