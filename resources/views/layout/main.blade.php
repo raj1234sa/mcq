@@ -54,7 +54,7 @@
         <section class="content">
             @endif
             @if ($__env->yieldContent('page-header') || $__env->yieldContent('page-description'))
-                <header class="content__title row justify-content-between align-items-center">
+                <header class="content__title row no-gutters justify-content-between align-items-center">
                     <div class="col-auto">
                         @if ($__env->yieldContent('page-header'))
                             <h1>@yield('page-header')</h1>

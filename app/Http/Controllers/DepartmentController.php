@@ -92,7 +92,7 @@ class DepartmentController extends Controller
         $dir = $req->input('order')[0]['dir'];
         $totalRec = count(Department::get());
 
-        $search = extract_search_field($req);
+        $search = extract_search_field($req->input('data'));
         
         $start = $req->input('start');
         $length = $req->input('length');
@@ -170,5 +170,42 @@ class DepartmentController extends Controller
             $response = new Response('Cannot delete department');
         }
         return $response;
+    }
+
+    public function export(Request $req)
+    {
+        $fieldArr = array(
+            'departments.id',
+            'department_name',
+            'status',
+        );
+        $tableFields = extract_export_table($req);
+        $order = $tableFields['order'][0]['column'];
+        $dir = $tableFields['order'][0]['dir'];
+
+        $search = extract_search_field($tableFields['data']);
+        
+        $start = $tableFields['start'];
+        $length = $tableFields['length'];
+        $departments = Department::offset($start)->limit($length);
+        $departments->select("departments.*", DB::raw("IF(status = '1', 'Enabled', 'Disabled') as status"));
+        $departments->orderBy($fieldArr[$order], $dir);
+
+        if(!empty($search['keywords'])) {
+            $departments->where("departments.department_name", "LIKE", "%{$search['keywords']}%");
+        }
+
+        $departments = $departments->get();
+
+        $fields = array();
+        $fields[] = array("id" => array("title" => "Department ID", "name" => "id"));
+        $fields[] = array("department_name" => array("title" => "Department Name", "name" => "department_name"));
+        $fields[] = array("status" => array("title" => "Status", "name" => "status"));
+
+        $spreadsheet = export_file_generate($fields, $departments, array(
+            'sheetTitle' => 'Department Report',
+            'headerDate' => 'All',
+        ));
+        return export_report($spreadsheet, 'export_department.xlsx');
     }
 }

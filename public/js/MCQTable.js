@@ -35,6 +35,8 @@ function getSearchData(action = []) {
     return data;
 }
 
+window.tableParams = [];
+
 function drawTable(action = [], from = '') {
     $("#filterForm select, #filterForm input, #filterForm button[type!=button]").each(function () {
         $.cookie("search_" + $(this).attr("id"), $(this).val());
@@ -43,9 +45,9 @@ function drawTable(action = [], from = '') {
     var columnDefs = [];
     var action = getSearchAction();
     var data = getSearchData(action);
-    var pageLength = $("#dataTable_length").children('select').val();
+    var pageLength = $("#dataTable_length").find('select').val();
     if (from == "print") {
-        pageLength = 500;
+        // pageLength = 500;
         var printHides = [];
         $("thead tr th").each(function (index) {
             if ($(this).data('printhide') == true) {
@@ -97,7 +99,10 @@ function drawTable(action = [], from = '') {
         },
         "fnDrawCallback": function () {
             stopAjaxLoader();
-            if ($("tbody").text() != "No data available in table") {
+            if(from == 'print') {
+                $(document).find(".change_status.ajax").hide();
+            }
+            if ($("tbody").text() != "No matching records found") {
                 var html = '';
                 if ($(".table-tools").html() == undefined) {
                     html += '<div class="table-tools">';
@@ -106,12 +111,12 @@ function drawTable(action = [], from = '') {
                     tabletools.forEach(element => {
                         if (element == 'print') {
                             var printHtml = '';
-                            printHtml = '<button type="button" class="btn btn-white print-btn"><i class="fas fa-print"></i></button>';
+                            printHtml = '<button type="button" class="btn btn-light btn--icon-text print-btn" title="Print"><i class="zmdi zmdi-print"></i></button>';
                             html += printHtml;
                         }
                         if (element == 'export') {
                             var exportHtml = '';
-                            exportHtml = '<button type="button" data-export=' + exportRoute + ' class="btn btn-white btn-success export-btn"><i class="fa fa-file-excel"></i></button>';
+                            exportHtml = '<button type="button" data-export=' + exportRoute + ' class="btn btn-light btn--icon-text export-btn" title="Export CSV"><i class="zmdi zmdi-download"></i></button>';
                             html += exportHtml;
                         }
                     });
@@ -139,6 +144,7 @@ function drawTable(action = [], from = '') {
             }
         }
     });
+    window.tableParams = table.ajax.params();
     $(".dataTables_processing").empty();
     $(".dataTables_processing").append('<div class="table_processing">Processing</div>');
 }
@@ -283,5 +289,64 @@ $(document).ready(function () {
     });
     $("thead tr th > #table_select_all").change(function () {
         $("tbody tr td > input[class*=table_checkbox]").prop('checked', $(this).prop('checked'));
+    });
+
+    var paddingClass = $("section.content").css('padding');
+    $(document).keyup(function (e) {
+        if (e.which == 27 && window.printMode == true) {
+            drawTable(getSearchAction());
+            $("header.header").show();
+            $("aside.sidebar").show();
+            $("section.content").css('padding', paddingClass);
+            $(".content__title .actions-div").show();
+            $("#filterForm").show();
+            $(".table-tools").show();
+            $("footer").show();
+            $(".dataTable_processing").show();
+            $(".dataTables_length").show();
+            $(".dataTables_paginate").show();
+            $(".dataTables_info").show();
+            $(".change_status.ajax").show();
+            window.printMode = false;
+        }
+    });
+    $(document).delegate('.export-btn', 'click', function () {
+        var url = $(this).data('export');
+        var action = getSearchAction();
+        var data = getSearchData(action);
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {data: data, tableParams: window.tableParams, _token: $("#csrf").val()},
+            beforeSend: function () {
+                startAjaxLoader();
+            },
+            success: function (data) {
+                var $a = $("<a>");
+                $a.attr("href", data.file);
+                $("body").append($a);
+                $a.attr("download", data.fileName);
+                $a[0].click();
+                $a.remove()
+            },
+            complete: function () {
+                stopAjaxLoader();
+            }
+        });
+    });
+    $(document).delegate(".print-btn", 'click', function () {
+        window.printMode = true;
+        drawTable(getSearchAction(), 'print');
+        $("header.header").hide();
+        $("aside.sidebar").hide();
+        $("section.content").css('padding', "0");
+        $(".content__title .actions-div").hide();
+        $("#filterForm").hide();
+        $(".table-tools").hide();
+        $("footer").hide();
+        $(".dataTable_processing").hide();
+        $(".dataTables_length").hide();
+        $(".dataTables_paginate").hide();
+        $(".dataTables_info").hide();
     });
 });

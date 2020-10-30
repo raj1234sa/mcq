@@ -52,3 +52,9 @@
     text-align: center;
     color: #32c787;
 }
+
+.table-tools {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+}

@@ -3,47 +3,6 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 
-function get_sidebar_links()
-{
-    $links = array();
-    $links[] = array(
-        'title' => 'Dashboard',
-        'route' => '/dashboard',
-        'icon' => 'zmdi zmdi-home',
-    );
-    $links[] = array(
-        'title' => 'Department',
-        'icon' => 'zmdi zmdi-folder',
-        'children' => array(
-            array(
-                'title' => 'Departments',
-                'route' => '/department-list',
-            ),
-        ),
-    );
-    $links[] = array(
-        'title' => 'Category',
-        'icon' => 'zmdi zmdi-folder',
-        'children' => array(
-            array(
-                'title' => 'Categories',
-                'route' => '/category-list',
-            ),
-        ),
-    );
-    $links[] = array(
-        'title' => 'Subject',
-        'icon' => 'zmdi zmdi-view-week',
-        'children' => array(
-            array(
-                'title' => 'Subjects',
-                'route' => '/subject-list',
-            ),
-        ),
-    );
-    return $links;
-}
-
 function draw_action_buttons($actions)
 {
     $html = '';
