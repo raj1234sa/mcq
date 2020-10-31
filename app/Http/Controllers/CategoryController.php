@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -104,7 +105,7 @@ class CategoryController extends Controller
         $dir = $req->input('order')[0]['dir'];
         $totalRec = count(Category::get());
 
-        $search = extract_search_field($req);
+        $search = extract_search_field($req->input('data'));
 
         $start = $req->input('start');
         $length = $req->input('length');
@@ -131,6 +132,9 @@ class CategoryController extends Controller
             $rec[] = $sr;
             $rec[] = $cate['category_name'];
             $rec[] = $cate['department']['department_name'];
+            $currentStatus = $cate['status'] == '1' ? '<span class="text-success">ACTIVE</span>' : '<span class="text-danger">INACTIVE</span>';
+            $statusButton = $cate['status'] == '1' ? "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='0' data-url='/category-status' data-id='{$cate['id']}' title='Deactivate'><i class='zmdi zmdi-close'></i></button>" : "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='1' data-url='/category-status' data-id='{$cate['id']}' title='Activate'><i class='zmdi zmdi-check'></i></button>";
+            $rec[] = $currentStatus . $statusButton;
             $action_links = array();
             $action_links['Edit'] = array(
                 'icon' => 'far fa-edit',
@@ -143,9 +147,6 @@ class CategoryController extends Controller
                     'link' => '/category-delete/' . $cate['id'],
                 );
             }
-            $currentStatus = $cate['status'] == '1' ? '<span class="text-success">ACTIVE</span>' : '<span class="text-danger">INACTIVE</span>';
-            $statusButton = $cate['status'] == '1' ? "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='0' data-url='/category-status' data-id='{$cate['id']}' title='Deactivate'><i class='zmdi zmdi-close'></i></button>" : "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='1' data-url='/category-status' data-id='{$cate['id']}' title='Activate'><i class='zmdi zmdi-check'></i></button>";
-            $rec[] = $currentStatus . $statusButton;
             $rec[] = draw_action_menu($action_links);
             $htmlArray[] = $rec;
             $sr++;
@@ -185,5 +186,45 @@ class CategoryController extends Controller
             $response = new Response('Cannot change status of category');
         }
         return $response;
+    }
+    
+    public function export(Request $req) {
+        $fieldArr = array(
+            'id',
+            'category_name',
+            'department_name',
+            'status',
+        );
+
+        $order = $req->input('column');
+        $dir = $req->input('dir');
+
+        $search = extract_search_field($req->input('data'));
+
+        $categories = Category::orderBy($fieldArr[$order], $dir);
+        $categories->select("categories.*", "departments.department_name", DB::raw("IF(categories.status = '1', 'Enabled', 'Disabled') as status"));
+
+        if(!empty($search['keywords'])) {
+            $categories->where("category_name", "LIKE", "%{$search['keywords']}%");
+        }
+        if(!empty($search['department_id'])) {
+            $categories->where("department_id", "=", $search['department_id']);
+        }
+        $categories->leftjoin("departments", "departments.id", "=", "categories.department_id");
+
+        $categories = $categories->get();
+
+        $export_structure = array();
+        $export_structure[] = array('id'=>array('name'=>'id', 'title'=>'Category ID'));
+        $export_structure[] = array('category_name'=>array('name'=>'category_name', 'title'=>'Category Name'));
+        $export_structure[] = array('department_name'=>array('name'=>'department_name', 'title'=>'Deparment Name'));
+        $export_structure[] = array('status'=>array('name'=>'status', 'title'=>'Status'));
+
+        $spreadsheet = export_file_generate($export_structure, $categories, array(
+            'headerDate' => 'All',
+            'sheetTitle' => 'Category Report',
+        ));
+
+        return export_report($spreadsheet, 'export_categories.xlsx');
     }
 }

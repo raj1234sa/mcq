@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class SubjectController extends Controller
 {
@@ -115,7 +116,7 @@ class SubjectController extends Controller
         $order = $req->input('order')[0]['column'];
         $dir = $req->input('order')[0]['dir'];
         $totalRec = count(Subject::get());
-        $search = extract_search_field($req);
+        $search = extract_search_field($req->input('data'));
 
         $start = $req->input('start');
         $length = $req->input('length');
@@ -212,6 +213,52 @@ class SubjectController extends Controller
     {
         $dept_id = $req->input('dept_id');
         $categories = Category::where('department_id', '=', $dept_id)->get();
-        return draw_options($categories, 'id', 'category_name', '');
+        return draw_options($categories, 'id', 'category_name', $req->input('selected'),"<option value=''>Select Category</option>");
+    }
+
+    public function export(Request $req) {
+        $fieldArr = array(
+            'id',
+            'subject_name',
+            'department_name,category_name',
+            'status',
+        );
+
+        $order = $req->input('column');
+        $dir = $req->input('dir');
+
+        $search = extract_search_field($req->input('data'));
+
+        $subjects = Subject::orderBy($fieldArr[$order], $dir);
+        $subjects->select("subjects.*", "departments.department_name", "categories.category_name", DB::raw("IF(subjects.status = '1', 'Enabled', 'Disabled') as status"));
+
+        if(!empty($search['keywords'])) {
+            $subjects->where("subject_name", "LIKE", "%{$search['keywords']}%");
+        }
+        if(!empty($search['department_id'])) {
+            $subjects->where("department_id", "=", $search['department_id']);
+        }
+        if(!empty($search['category_id'])) {
+            $subjects->where("category_id", "=", $search['category_id']);
+        }
+
+        $subjects->leftjoin("departments", "departments.id", "=", "subjects.department_id");
+        $subjects->leftjoin("categories", "categories.id", "=", "subjects.category_id");
+
+        $subjects = $subjects->get();
+
+        $export_structure = array();
+        $export_structure[] = array('id'=>array('name'=>'id', 'title'=>'Subject ID'));
+        $export_structure[] = array('subject_name'=>array('name'=>'subject_name', 'title'=>'Subject Name'));
+        $export_structure[] = array('department_name'=>array('name'=>'department_name', 'title'=>'Deparment Name'));
+        $export_structure[] = array('category_name'=>array('name'=>'category_name', 'title'=>'Category Name'));
+        $export_structure[] = array('status'=>array('name'=>'status', 'title'=>'Status'));
+
+        $spreadsheet = export_file_generate($export_structure, $subjects, array(
+            'headerDate' => 'All',
+            'sheetTitle' => 'Subject Report',
+        ));
+
+        return export_report($spreadsheet, 'export_subjects.xlsx');
     }
 }

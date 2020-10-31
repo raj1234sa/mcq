@@ -1,5 +1,6 @@
 $(document).ready(function () {
     $(".form-reset").click(function () {
+        $("form select, form input").trigger('change');
         $("form").trigger('reset');
     });
     $(".form-save").click(function () {

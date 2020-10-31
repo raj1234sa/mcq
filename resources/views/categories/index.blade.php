@@ -15,18 +15,24 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table id="dataTable" class="table table-bordered ajax" data-load="/get-categories">
+                <table id="dataTable" class="table table-bordered ajax w-100" data-load="/get-categories">
                     <thead class="thead-default">
                     <tr>
                         <th>Sr</th>
                         <th>Category Name</th>
                         <th>Department Name</th>
                         <th class="text-center">Status</th>
-                        <th data-order="false">Action</th>
+                        <th data-order="false" data-printhide='true'>Action</th>
                     </tr>
                     </thead>
                 </table>
             </div>
         </div>
     </div>
+@endsection
+@section('js')
+    <script>
+        var tabletools = ['print','export'];
+        var exportRoute = '/category-export';
+    </script>
 @endsection

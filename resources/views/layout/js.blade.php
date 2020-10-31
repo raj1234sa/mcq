@@ -12,3 +12,4 @@
 <script src="{{DIR_HTTP_VENDOR}}datatables-buttons/buttons.html5.min.js"></script>
 
 <script src="{{DIR_HTTP_VENDOR}}sweetalert2/sweetalert2.min.js"></script>
+<script src="{{DIR_HTTP_JS}}validation.js"></script>

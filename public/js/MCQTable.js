@@ -97,7 +97,13 @@ function drawTable(action = [], from = '') {
                 }
             });
         },
-        "fnDrawCallback": function () {
+        "drawCallback": function( settings ) {
+            console.log(settings);
+        },
+        "fnDrawCallback": function (settings) {
+            window.tableParams = settings.ajax.data;
+            window.tableParams.column = settings.aaSorting[0][0];
+            window.tableParams.dir = settings.aaSorting[0][1];
             stopAjaxLoader();
             if(from == 'print') {
                 $(document).find(".change_status.ajax").hide();
@@ -144,7 +150,6 @@ function drawTable(action = [], from = '') {
             }
         }
     });
-    window.tableParams = table.ajax.params();
     $(".dataTables_processing").empty();
     $(".dataTables_processing").append('<div class="table_processing">Processing</div>');
 }
@@ -317,7 +322,7 @@ $(document).ready(function () {
         $.ajax({
             url: url,
             type: "POST",
-            data: {data: data, tableParams: window.tableParams, _token: $("#csrf").val()},
+            data: window.tableParams,
             beforeSend: function () {
                 startAjaxLoader();
             },

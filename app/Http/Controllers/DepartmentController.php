@@ -97,10 +97,7 @@ class DepartmentController extends Controller
         $start = $req->input('start');
         $length = $req->input('length');
         $departments = Department::offset($start)->limit($length);
-        $departments->select("departments.*", "categories.id as category_id", "subjects.id as subject_id");
         $departments->orderBy($fieldArr[$order], $dir);
-        $departments->leftjoin("categories", "categories.department_id", "=", "departments.id");
-        $departments->leftjoin("subjects", "subjects.department_id", "=", "departments.id");
 
         if(!empty($search['keywords'])) {
             $departments->where("departments.department_name", "LIKE", "%{$search['keywords']}%");
@@ -110,26 +107,30 @@ class DepartmentController extends Controller
         
         $htmlArray = array();
         $sr = $start+1;
+        
         foreach ($departments as $dept) {
+            $dept->category;
+            $dept->subject;
+
             $rec = array();
             $rec['DT_RowId'] = 'serv:' . $dept['id'];
             $rec[] = $sr;
             $rec[] = $dept['department_name'];
+            $currentStatus = $dept['status'] == '1' ? '<span class="text-success">ACTIVE</span>' : '<span class="text-danger">INACTIVE</span>';
+            $statusButton = $dept['status'] == '1' ? "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='0' data-url='/department-status' data-id='{$dept['id']}' title='Deactivate'><i class='zmdi zmdi-close'></i></button>" : "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='1' data-url='/department-status' data-id='{$dept['id']}' title='Activate'><i class='zmdi zmdi-check'></i></button>";
+            $rec[] = $currentStatus.$statusButton;
             $action_links = array();
             $action_links['Edit'] = array(
                 'icon' => 'far fa-edit',
                 'link' => '/department-add/' . $dept['id'],
             );
-            if(empty($dept['category_id']) && empty($dept['subject_id'])) {
+            if(empty($dept['category']) && empty($dept['subject'])) {
                 $action_links['Delete'] = array(
                     'class' => 'label-danger ajax delete',
                     'icon' => 'far fa-trash-alt',
                     'link' => '/department-delete/' . $dept['id'],
                 );
             }
-            $currentStatus = $dept['status'] == '1' ? '<span class="text-success">ACTIVE</span>' : '<span class="text-danger">INACTIVE</span>';
-            $statusButton = $dept['status'] == '1' ? "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='0' data-url='/department-status' data-id='{$dept['id']}' title='Deactivate'><i class='zmdi zmdi-close'></i></button>" : "<button class='btn btn-dark btn--icon ml-2 ajax change_status' data-status='1' data-url='/department-status' data-id='{$dept['id']}' title='Activate'><i class='zmdi zmdi-check'></i></button>";
-            $rec[] = $currentStatus.$statusButton;
             $rec[] = draw_action_menu($action_links);
             $htmlArray[] = $rec;
             $sr++;
@@ -179,17 +180,14 @@ class DepartmentController extends Controller
             'department_name',
             'status',
         );
-        $tableFields = extract_export_table($req);
-        $order = $tableFields['order'][0]['column'];
-        $dir = $tableFields['order'][0]['dir'];
 
-        $search = extract_search_field($tableFields['data']);
+        $order = $req->input('column');
+        $dir = $req->input('dir');
+
+        $search = extract_search_field($req->input('data'));
         
-        $start = $tableFields['start'];
-        $length = $tableFields['length'];
-        $departments = Department::offset($start)->limit($length);
+        $departments = Department::orderBy($fieldArr[$order], $dir);
         $departments->select("departments.*", DB::raw("IF(status = '1', 'Enabled', 'Disabled') as status"));
-        $departments->orderBy($fieldArr[$order], $dir);
 
         if(!empty($search['keywords'])) {
             $departments->where("departments.department_name", "LIKE", "%{$search['keywords']}%");

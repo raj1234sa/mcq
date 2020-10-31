@@ -61,16 +61,26 @@ function form_element($label, $name, $type, $value='', $extra = array())
     $html = '';
     $id = $name;
     $div_class = '';
+    $validation = array();
     if (isset($extra['id']) || !empty($extra['id'])) {
         $id = $extra['id'];
     }
     if (isset($extra['frm_grp_class'])) {
         $div_class = $extra['frm_grp_class'];
     }
+    if (isset($extra['validation']) || !empty($extra['validation'])) {
+        $validation = $extra['validation'];
+    }
+
+    $validationAttr = '';
+    foreach ($validation as $key => $value1) {
+        $validationAttr = "data-validate-$key='$value1' ";
+    }
+
     if(isset($extra['form_group']) && $extra['form_group'] == false) {
         $html .= "<div class='position-relative $div_class'>";
     } else {
-        $html .= "<div class='form-group col-12 $div_class'>";
+        $html .= "<div class='form-group col-12 $div_class' $validationAttr>";
     }
     if (!empty($label)) {
         $html .= "<label>$label</label>";
@@ -90,16 +100,26 @@ function form_select($label, $name, $value, $extra = array())
     $html = '';
     $id = $name;
     $div_class = '';
+    $validation = array();
     if (isset($extra['id']) || !empty($extra['id'])) {
         $id = $extra['id'];
     }
     if (isset($extra['frm_grp_class'])) {
         $div_class = $extra['frm_grp_class'];
     }
+    if (isset($extra['validation']) || !empty($extra['validation'])) {
+        $validation = $extra['validation'];
+    }
+
+    $validationAttr = '';
+    foreach ($validation as $key => $value1) {
+        $validationAttr = "data-validate-$key='$value1' ";
+    }
+
     if(isset($extra['form_group']) && $extra['form_group'] == false) {
         $html .= "<div class='position-relative $div_class'>";
     } else {
-        $html .= "<div class='form-group col-12 $div_class'>";
+        $html .= "<div class='form-group col-12 $div_class' $validationAttr>";
     }
     if (!empty($label)) {
         $html .= "<label>$label</label>";
@@ -111,7 +131,7 @@ function form_select($label, $name, $value, $extra = array())
     if (isset($extra['searchdropdown']) && $extra['searchdropdown'] == false) {
         $attributes .= "data-minimum-results-for-search='Infinity'";
     }
-    $html .= "<select class='select2' id='$id' name='$name' $attributes>";
+    $html .= "<select class='select2 form-control' id='$id' name='$name' $attributes>";
 
     if (isset($extra['list_before']) && !empty($extra['list_before'])) {
         $html .= $extra['list_before'];
@@ -154,8 +174,11 @@ function draw_switchbutton($label, $name, $value, $extra = array())
     return $html;
 }
 
-function draw_options($list, $value_field, $text_field, $selected) {
+function draw_options($list, $value_field, $text_field, $selected, $before = null) {
     $html = '';
+    if(isset($before) || !empty($before)) {
+        $html .= $before;
+    }
     foreach ($list as $value) {
         $select = ($selected == $value[$value_field]) ? "selected='selected'" : '';
         $html .= "<option value='" . $value[$value_field] . "' $select>" . $value[$text_field] . "</option>";
