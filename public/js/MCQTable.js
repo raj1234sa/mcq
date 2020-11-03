@@ -108,7 +108,7 @@ function drawTable(action = [], from = '') {
             if(from == 'print') {
                 $(document).find(".change_status.ajax").hide();
             }
-            if ($("tbody").text() != "No matching records found") {
+            if ($("tbody").text() != "No matching records found" && $("tbody").text() != "No data available in table") {
                 var html = '';
                 if ($(".table-tools").html() == undefined) {
                     html += '<div class="table-tools">';

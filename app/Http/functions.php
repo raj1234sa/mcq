@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
@@ -40,6 +41,16 @@ function get_sidebar_links()
             array(
                 'title' => 'Subjects',
                 'route' => '/subject-list',
+            ),
+        ),
+    );
+    $links[] = array(
+        'title' => 'Examinations',
+        'icon' => 'zmdi zmdi-view-week',
+        'children' => array(
+            array(
+                'title' => 'Examinations',
+                'route' => '/exam-list',
             ),
         ),
     );
@@ -202,5 +213,11 @@ function extract_export_table(Request $req) {
         $returnArr[$key] = $value;
     }
     return $returnArr;
+}
+
+function objectToArray($object) {
+    $object = new Collection($object);
+    $object = $object->all();
+    return $object;
 }
 ?>

@@ -36,3 +36,13 @@ Route::post('/subject-status', 'App\Http\Controllers\SubjectController@changeSta
 Route::post('/get-department-category', 'App\Http\Controllers\SubjectController@getDepartmentCategory');
 Route::post('/subject-export', 'App\Http\Controllers\SubjectController@export');
 
+Route::get('/exam-list', 'App\Http\Controllers\ExaminationController@index');
+Route::get('/exam-add', 'App\Http\Controllers\ExaminationController@create');
+Route::get('/exam-add/{id}', 'App\Http\Controllers\ExaminationController@edit');
+Route::post('/exam-save-form', 'App\Http\Controllers\ExaminationController@save');
+Route::post('/get-exams', 'App\Http\Controllers\ExaminationController@getExams');
+Route::get('/exam-delete/{id}', 'App\Http\Controllers\ExaminationController@deleteExam');
+Route::post('/exam-status', 'App\Http\Controllers\ExaminationController@changeStatus');
+Route::post('/get-subject-category', 'App\Http\Controllers\ExaminationController@getSubjectCategory');
+Route::post('/exam-export', 'App\Http\Controllers\ExaminationController@export');
+

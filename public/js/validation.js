@@ -1,6 +1,6 @@
 $(document).ready(function () {
     $("div").each(function () {
-        let element = $(this).find('input, select');
+        let element = $(this).find('input, select, textarea');
         if ($(this).data('validate-required') !== undefined) {
             $(this).find('label').after('<span class="text-danger error-star">*</span>');
         }
@@ -8,7 +8,7 @@ $(document).ready(function () {
     $('form').submit(function () {
         let formSubmit = true;
         $("div").each(function () {
-            let element = $(this).find('input:not(.ignore), select:not(.ignore)');
+            let element = $(this).find('input:not(.ignore), textarea:not(.ignore), select:not(.ignore)');
             let EValue = $(element).val();
             let elemValid = true;
             if ($(this).data('validate-required') !== undefined) {
@@ -17,7 +17,7 @@ $(document).ready(function () {
                 $(element).removeClass('is-invalid');
                 if (EValue == '') {
                     $(element).addClass('is-invalid');
-                    $(this).append('<div id="err_' + element.attr('id') + '" class="invalid-feedback">' + Error + '</div>');
+                    $(this).append('<div id="err_' + element.attr('id') + '" class="invalid-tooltip">' + Error + '</div>');
                     formSubmit = false;
                     elemValid = false;
                 }
@@ -28,7 +28,7 @@ $(document).ready(function () {
                 $(element).removeClass('is-invalid');
                 if (isNaN(EValue)) {
                     $(element).addClass('is-invalid');
-                    $(this).append('<div id="err_' + element.attr('id') + '"><br><div class="text-danger">' + Error + '</div>');
+                    $(this).append('<div id="err_' + element.attr('id') + '" class="invalid-tooltip">' + Error + '</div>');
                     formSubmit = false;
                     elemValid = false;
                 }

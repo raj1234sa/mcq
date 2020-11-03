@@ -89,7 +89,22 @@ function form_element($label, $name, $type, $value='', $extra = array())
     if(isset($extra['hint'])) {
         $placeholder = $extra['hint'];
     }
-    $html .= "<input type='$type' value='$value' name='$name' id='$id' class='form-control' placeholder='$placeholder'>";
+    switch ($type) {
+        case 'datepicker':
+            $html .= "<input type='date' class='form-control hidden-md-up ignore' placeholder='$placeholder'>
+            <input type='text' value='$value' name='$name' id='$id' class='form-control date-picker hidden-sm-down' placeholder='$placeholder'>";
+            break;
+        case 'number':
+        case 'text':
+            $html .= "<input type='$type' value='$value' name='$name' id='$id' class='form-control' placeholder='$placeholder'>";
+            break;
+        case 'textarea':
+            $html .= "<textarea type='$type' name='$name' id='$id' class='form-control' placeholder='$placeholder'>$value</textarea>";
+            break;
+        default:
+            $html .= "<input type='text' value='$value' name='$name' id='$id' class='form-control' placeholder='$placeholder'>";
+            break;
+    }
     $html .= '<i class="form-group__bar"></i>';
     $html .= "</div>";
     return $html;
