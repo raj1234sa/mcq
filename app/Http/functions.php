@@ -54,6 +54,16 @@ function get_sidebar_links()
             ),
         ),
     );
+    $links[] = array(
+        'title' => 'Questions',
+        'icon' => 'zmdi zmdi-view-week',
+        'children' => array(
+            array(
+                'title' => 'Questions',
+                'route' => '/question-list',
+            ),
+        ),
+    );
     return $links;
 }
 
@@ -130,7 +140,7 @@ function export_file_generate($export_data_structure, $export_data, $extra)
         ];
         $headerCells = array();
         foreach ($export_data_structure as $key => $value) {
-            foreach ($value as $key1 => $value1) {
+            foreach ($value as $value1) {
                 $header[] = $value1['title'];
                 $sheet->setCellValue(chr(65 + $key) . '1', $value1['title']);
                 $sheet->getStyle(chr(65 + $key) . '1')->applyFromArray($styleArray);
@@ -150,10 +160,22 @@ function export_file_generate($export_data_structure, $export_data, $extra)
         $sheet->getRowDimension(1)->setRowHeight(30);
         $cellvalue = array();
         foreach ($export_data as $rowcount => $value) {
+            $value = objectToArray($value);
             $rowcount += $rowIndex;
             foreach ($export_data_structure as $colcount => $value1) {
                 $cellHeight = 15;
                 $value1 = array_values($value1)[0];
+                if(isset($value1['call_func']) && !empty($value1['call_func'])) {
+                    $func_param = array();
+                    foreach ($value1['func_param'] as $param) {
+                        if(in_array($param, array_keys($value))) {
+                            $func_param[] = $value[$param];
+                        } else {
+                            $func_param[] = $param;
+                        }
+                    }
+                    $value[$value1['name']] = call_user_func_array($value1['call_func'], $func_param);
+                }
                 if (is_array($value[$value1['name']])) {
                     $cellHeight = count($value[$value1['name']]) * 15;
                     $value[$value1['name']] = implode("\n", $value[$value1['name']]);
@@ -219,5 +241,13 @@ function objectToArray($object) {
     $object = new Collection($object);
     $object = $object->all();
     return $object;
+}
+
+function addPostfix($value, $postfix) {
+    return $value.$postfix;
+}
+
+function setDateFormat($value, $format) {
+    return date($format, strtotime($value));
 }
 ?>

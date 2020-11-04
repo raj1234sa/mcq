@@ -1,22 +1,21 @@
 @extends('layout.main')
-@section('page-title', 'Examinations')
-@section('page-header', 'Examinations')
+@section('page-title', 'Questions')
+@section('page-header', 'Questions')
 @section('page-content')
     <div class="card">
         <div class="card-body">
             <div class="row no-gutters">
                 <div class="col-12">
                     <form id="filterForm" class="form-inline">
-                        {!! form_element('', 'keywords', 'text', '', array('frm_grp_class'=>'col-3 p-0 mr-3', 'hint'=>'Examination Name', 'form_group'=>false)) !!}
-                        {!! form_select('', 'subject_id', '', array('list'=>$subjects, 'text_field'=>'subject_name', 'value_field'=>'id','form_group'=>false,'frm_grp_class'=>'col-2 p-0 mr-3', 'searchdropdown'=>false, 'list_before'=>"<option value=''>Select Subject</option>")) !!}
-                        {!! form_select('', 'category_id', '', array('list'=>$categories, 'text_field'=>'category_name', 'value_field'=>'id','form_group'=>false,'frm_grp_class'=>'col-2 p-0 mr-3', 'searchdropdown'=>false, 'list_before'=>"<option value=''>Select Category</option>")) !!}
+                        {!! form_element('', 'keywords', 'text', '', array('frm_grp_class'=>'col-3 p-0 mr-3', 'hint'=>'Search Question', 'form_group'=>false)) !!}
+                        {!! form_select('', 'exam_id', '', array('list'=>$examinations, 'text_field'=>'exam_name', 'value_field'=>'id','form_group'=>false,'frm_grp_class'=>'col-2 p-0 mr-3', 'searchdropdown'=>false, 'list_before'=>"<option value=''>Select Exam</option>")) !!}
                         <button type="button" class="btn btn-secondary btn--icon-text" id="search"><i class="zmdi zmdi-search"></i> Search</button>
                         <button type="button" class="btn btn-link" id="reset">Reset</button>
                     </form>
                 </div>
             </div>
             <div class="table-responsive">
-                <table id="dataTable" class="table table-bordered ajax w-100" data-load="/get-exams">
+                <table id="dataTable" class="table table-bordered ajax w-100" data-load="/get-questions">
                     <thead class="thead-default">
                     <tr>
                         <th>Sr</th>

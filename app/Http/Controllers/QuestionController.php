@@ -2,15 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\Department;
 use App\Models\Examination;
-use App\Models\Subject;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 
-class ExaminationController extends Controller
+class QuestionController extends Controller
 {
     private $fieldArr = array(
         'id',
@@ -24,26 +19,21 @@ class ExaminationController extends Controller
     public function index()
     {
         $action_button = array();
-        $action_button['Add Exam'] = array(
+        $action_button['Add Question'] = array(
             'icon' => 'zmdi zmdi-plus',
-            'route' => '/exam-add',
+            'route' => '/question-add',
             'class' => 'btn-success'
         );
-        $subjects = Subject::get();
-        foreach ($subjects as $value) {
-            $value->subject_name .= draw_disabled_dropdown($value['status']);
-        }
-        $categories = Category::get();
-        foreach ($categories as $value) {
-            $value->category_name .= draw_disabled_dropdown($value['status']);
+        $examinations = Examination::get();
+        foreach ($examinations as $value) {
+            $value->exam_name .= draw_disabled_dropdown($value['status']);
         }
         $data = array(
-            'route' => "/exam-list",
+            'route' => "/question-list",
             'actions' => $action_button,
-            'subjects' => $subjects,
-            'categories' => $categories,
+            'examinations' => $examinations,
         );
-        return view('examination.index', $data);
+        return view('questions.index', $data);
     }
 
     public function create()
